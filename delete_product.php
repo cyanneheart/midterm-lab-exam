@@ -1,7 +1,7 @@
 <?php
 include 'db_connect.php';
 
-$productID = $_GET['productID'];
+$productID = $_POST['productID'];
 
 $sql = "DELETE FROM products WHERE productID = ?";
 $stmt = $conn->prepare($sql);

@@ -162,6 +162,19 @@ $result = $conn->query($sql);
 $(document).ready(function() {
     $('#productTable').DataTable();
 
+    // Function to refresh product table dynamically
+    function refreshProductTable() {
+        $.ajax({
+            url: 'fetch_products.php', // This should point to a PHP script that returns the updated product table rows
+            type: 'GET',
+            success: function(data) {
+                $('#productTable').DataTable().clear().destroy(); // Destroy previous DataTable instance
+                $('tbody').html(data); // Replace tbody with new data
+                $('#productTable').DataTable(); // Reinitialize DataTable
+            }
+        });
+    }
+
     // Edit button functionality
     $(document).on('click', '.editBtn', function() {
         var productID = $(this).data('id');
@@ -194,7 +207,15 @@ $(document).ready(function() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = 'delete_product.php?productID=' + productID;
+                $.ajax({
+                    url: 'delete_product.php',
+                    type: 'POST',
+                    data: { productID: productID },
+                    success: function(response) {
+                        Swal.fire('Deleted!', 'Your product has been deleted.', 'success');
+                        refreshProductTable(); // Refresh table without reloading
+                    }
+                });
             }
         });
     });
@@ -212,7 +233,8 @@ $(document).ready(function() {
                     title: 'Product Added',
                     text: 'The product has been added successfully!'
                 }).then(() => {
-                    location.reload();
+                    $('#addProductModal').modal('hide'); // Hide modal
+                    refreshProductTable(); // Refresh table without reloading
                 });
             }
         });
@@ -231,12 +253,14 @@ $(document).ready(function() {
                     title: 'Product Updated',
                     text: 'The product has been updated successfully!'
                 }).then(() => {
-                    location.reload();
+                    $('#editProductModal').modal('hide'); // Hide modal
+                    refreshProductTable(); // Refresh table without reloading
                 });
             }
         });
     });
 });
+
 </script>
 
 </body>
